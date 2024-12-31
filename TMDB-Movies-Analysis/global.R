@@ -50,7 +50,7 @@ movies_shiny = movies_shiny %>% select(-id, -adult, -original_language, -origina
 movies = movies %>% filter(Year >= 1900 & Year <= 2024, genres != "")
 movies_shiny = movies_shiny %>% filter(year(release_date) >= 1900 & year(release_date) <= 2024, genres != "")
 
-
+########################################################################################################
 
 
 

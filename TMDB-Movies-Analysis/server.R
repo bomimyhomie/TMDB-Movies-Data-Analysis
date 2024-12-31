@@ -58,6 +58,7 @@ function(input, output, session) {
   }, options = list(
     scrollY = "400px",
     pageLength = 25,
+    autoWidth = TRUE,
     responsive = TRUE,
     scrollCollapse = TRUE
   ))
@@ -154,7 +155,7 @@ function(input, output, session) {
       ggplot(aes(x = Budget, y = reorder(main_genre, Budget), fill = main_genre)) +
       geom_bar(stat = "identity") +
       coord_flip() +
-      labs(title = "Top 10 Genres by Budget", x = "Budget", y = "Genre") +
+      labs(title = "Top 10 Genres by Budget", x = "$ in millions", y = "Genre") +
       scale_x_continuous(labels = comma) +
       theme_minimal() +
       theme(
@@ -163,8 +164,7 @@ function(input, output, session) {
         axis.line = element_line(color = 'black'),
         axis.ticks = element_line(color = "black"),
         legend.position = "right"
-      ) +
-    guides(fill = guide_legend(title = "Genre", title.position = "top", label.position = "right"))
+      )
   })
   
   output$top20byrevenue <- renderPlot({
@@ -176,7 +176,7 @@ function(input, output, session) {
       ggplot(aes(x = Revenue, y = reorder(main_genre, Revenue), fill = main_genre)) +
       geom_bar(stat = "identity") +
       coord_flip() +
-      labs(title = "Top 10 Genres by Revenue", x = "Revenue", y = "Genre") +
+      labs(title = "Top 10 Genres by Revenue", x = "$ in millions", y = "Genre") +
       scale_x_continuous(labels = comma) +
       theme_minimal() +
       theme(
@@ -198,7 +198,7 @@ function(input, output, session) {
       ggplot(aes(x = Profit, y = reorder(main_genre, Profit), fill = main_genre)) +
       geom_bar(stat = "identity") +
       coord_flip() +
-      labs(title = "Top 10 Genres by Profit", x = "Profit", y = "Genre") +
+      labs(title = "Top 10 Genres by Profit", x = "$ in millions", y = "Genre") +
       scale_x_continuous(labels = comma) +
       theme_minimal() +
       theme(
