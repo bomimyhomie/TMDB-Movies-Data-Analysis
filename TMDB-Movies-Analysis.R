@@ -1,8 +1,9 @@
 library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(stringr)
 library(ggplot2)
 library(lubridate)
+library(viridis)
 
 setwd('C:/Users/vlad7/NYCDS/R/Shiny Project')
 
@@ -13,8 +14,6 @@ movies = movies_raw
 
 #Initial exploratory data analysis
 dim(movies)
-colnames(movies_shiny)
-str(movies_shiny)
 summary(movies)
 
 unique(movies$status)
@@ -97,12 +96,6 @@ movies %>% group_by(Year, main_genre) %>%
   filter(main_genre == 'Action')
 #use filter function with user input to select year?
 
-#Filter out movies with no genre, number of films by genre
-movies %>% filter(main_genre != "") %>%
-  group_by(main_genre, year) %>%
-  summarise(num_movies = n()) %>%
-  ggplot(aes(x=main_genre))
-
 #Create bar plots for Top 10 Genres
 movies_shiny %>%
   group_by(main_genre) %>%
@@ -115,5 +108,54 @@ movies_shiny %>%
   labs(title = "Top 10 Genres by Budget", x = "Budget", y = "Genre") +
   theme_minimal()
 
+#Scatter plot (y = vote_average)
+ggplot(data = movies,mapping = aes(x = vote_average,y = revenue)) +
+  theme_bw() +
+  geom_point() +
+  ggtitle("Average Vote vs. Revenue") +
+  xlab("Average Vote") +
+  ylab("Revenue ($)")
+
+movies_shiny %>%
+  ggplot(aes(x = log(profit + 1), y = vote_average)) +
+  geom_point()
+
+#Violin plot of ratings distribution for each genre
+movies_shiny %>%
+  filter(vote_count > 0) %>%
+ggplot(aes(x = main_genre, y = vote_average, fill = main_genre)) +
+  geom_violin(trim = FALSE) + 
+  labs(title = "Distribution of Average Rating by Genre", 
+       x = "Genre", 
+       y = "Average Rating") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = 'black'),
+    axis.ticks = element_line(color = "black"),
+    legend.position = "none"
+  )
+
+
+movies_shiny %>%
+  filter(vote_count > 0) %>%
+  group_by(main_genre, Year) %>%
+  summarise(Average_Rating = mean(vote_average, na.rm = TRUE)) %>%
+  ungroup() %>%
+  ggplot(aes(x = Year, y = main_genre, fill = Average_Rating)) +
+  geom_tile() +
+  scale_fill_viridis(option = "plasma") +
+  labs(title = "Heatmap of Average Rating by Genre and Year", 
+       x = "Year", 
+       y = "Genre") +
+  theme_minimal()
+
+
+cor_matrix <- movies_shiny %>%
+  select(vote_average, budget, revenue, profit, runtime) %>%
+  na.omit() %>%
+  cor()
 
 

@@ -15,7 +15,8 @@ sidebar <- dashboardSidebar(sidebarUserPanel("Vlad Lee", image = 'NYCDSA.png'),
     menuItem("Explore The Data", tabName = "explore_data", icon = icon("database"),
              badgeColor = "green"),
     menuItem("Top 10 Genres", tabName = "top10genres", icon = icon("medal")),
-    menuItem("Movies by Year and Genre", tabName = "by_year_genre",icon = icon("film")), 
+    menuItem("Movies by Year and Genre", tabName = "by_year_genre",icon = icon("film")),
+    menuItem("Ratings", tabName = "ratings", icon = icon("star")),
     menuItem("About", tabName = "about", icon = icon("circle-info"))
   )
 )
@@ -25,7 +26,22 @@ body <- dashboardBody(
     tabItem(tabName = "dashboard",
             h2("Dashboard tab content")
     ),
-    
+    tabItem(tabName = "homepage",
+            h2("Welcome to the TMDB Movies App!:"),
+            box(
+              title = "Background",
+              status = "primary",
+              solidHeader = TRUE,
+              width = 12,
+              HTML("
+              <p>The purpose of this app is to allow users to analyze trends in movies. The data used
+              in this app includes all movies listed on TMDB from 1900 to 2024. The dataset is available
+              through <a href='https://www.kaggle.com/datasets/asaniczka/tmdb-movies-dataset-2023-930k-movies' 
+              target='_blank'>Kaggle</a></p>
+              "
+              )
+            )
+    ),
     tabItem(tabName = "explore_data",
             fluidRow(
               column(4, 
@@ -84,7 +100,36 @@ body <- dashboardBody(
                          column(12, plotOutput("bar_plot_by_genre"))
                        ))
             )
-    )
+    ),
+    tabItem(tabName = "ratings",
+            tabBox(
+              width = 12,
+              id = "chart_tabs",
+              tabPanel("Distribution", plotOutput('ratings_dist')),
+              tabPanel("Summary Statistics", DT::DTOutput("summary_table")),
+              tabPanel("Ratings Heatmap", plotOutput('ratings_heatmap')),
+              tabPanel("Correlation Matrix", DT::DTOutput("corr_matrix"))
+            )
+    ),
+    tabItem(tabName = "about",
+            h2("About me:"),
+            box(
+              title = "Information",
+              status = "primary",
+              solidHeader = TRUE,
+              width = 12,
+              HTML("
+              <p>My name is Vlad Lee. I am an economic consultant and a student at NYC Data Science
+              Academy. Feel free to check out my profile pages and github!</p>
+              <p><a href='www.linkedin.com/in/vlad-lee' target='_blank'>LinkedIn</a></p>
+              <p><a href='https://www.nera.com/experts/l/vladislav-lee.html?lang=en' target='_blank'>NERA</a></P>
+              <p><a href='https://github.com/bomimyhomie/TMDB-Movies-Data-Analysis' target='_blank'>GitHub</a>.</p>
+              <p>For questions or feedback, contact the author at 
+              <a href='mailto:Vlad7984@gmail.com'>vlad7984@gmail.com</a>.</p>
+              "
+            )
+            )
+        )
   )
 )
 

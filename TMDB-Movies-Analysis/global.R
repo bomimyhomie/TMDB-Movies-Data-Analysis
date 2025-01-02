@@ -51,8 +51,48 @@ movies = movies %>% filter(Year >= 1900 & Year <= 2024, genres != "")
 movies_shiny = movies_shiny %>% filter(year(release_date) >= 1900 & year(release_date) <= 2024, genres != "")
 
 ########################################################################################################
+#Summary table for ratings distribution  
+summary_table <- movies_shiny %>%
+  filter(vote_count > 0) %>%
+  group_by(main_genre) %>%
+  summarise(
+    Mean_Rating = mean(vote_average, na.rm = TRUE),
+    Median_Rating = median(vote_average, na.rm = TRUE),
+    SD_Rating = sd(vote_average, na.rm = TRUE),
+    Min_Rating = min(vote_average, na.rm = TRUE),
+    Max_Rating = max(vote_average, na.rm = TRUE),
+    Count = n()
+  ) %>%
+  mutate(
+    Mean_Rating = format(round(Mean_Rating, 2), nsmall = 2),
+    Median_Rating = format(round(Median_Rating, 2), nsmall = 2),
+    SD_Rating = format(round(SD_Rating, 2), nsmall = 2),
+    Min_Rating = Min_Rating,
+    Max_Rating = Max_Rating
+  ) %>%
+  rename(
+    Genre = main_genre,
+    `Average Rating` = Mean_Rating,
+    `Median Rating` = Median_Rating,
+    `Standard Deviation` = SD_Rating,
+    `Minimum Rating` = Min_Rating,
+    `Maximum Rating` = Max_Rating,
+    `Movie Count` = Count
+  )
 
 
+#Correlation matrix
+cor_matrix <- movies_shiny %>%
+  select(vote_average, budget, revenue, profit, runtime) %>%
+  rename(
+    `Average Rating` = vote_average,
+    `Budget` = budget,
+    `Revenue` = revenue,
+    `Profit` = profit,
+    `Runtime` = runtime
+  ) %>%
+  na.omit() %>%
+  cor()
 
 
 

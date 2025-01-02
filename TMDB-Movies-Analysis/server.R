@@ -18,7 +18,7 @@ function(input, output, session) {
   
   #Reactive expression to filter data based on input for Explore The Data (Table)
   filtered_data <- reactive({
-    data <- movies_shiny  # Assuming 'movies_shiny' is the dataset you are working with
+    data <- movies_shiny
     
     #Format numbers with commas for thousands and decimals to 2 places
     data = data %>% mutate(vote_count = comma(vote_count), revenue = comma(revenue), 
@@ -57,10 +57,16 @@ function(input, output, session) {
     filtered_data()
   }, options = list(
     scrollY = "400px",
+    scrollX = TRUE,
     pageLength = 25,
     autoWidth = TRUE,
     responsive = TRUE,
-    scrollCollapse = TRUE
+    scrollCollapse = TRUE,
+    columnDefs = list(        # Ensure no columns are hidden
+      list(targets = "_all", visible = TRUE)
+    ),
+    extensions = 'FixedColumns',
+    fixedHeader = TRUE
   ))
   
   #Reactive expression to filter data based on input for By Year/Genre tabs (Bar plots)
@@ -142,7 +148,8 @@ function(input, output, session) {
           as.character(x)
         },
         expand = c(0.05, 0.05)  #Add padding to the ends of the axis
-      )
+      ) +
+      guides(fill = guide_legend(title = "Genre", title.position = "top", label.position = "right"))
   })
   
   #Create bar plots for Top 10 Genres
@@ -164,7 +171,8 @@ function(input, output, session) {
         axis.line = element_line(color = 'black'),
         axis.ticks = element_line(color = "black"),
         legend.position = "right"
-      )
+      ) +
+      guides(fill = guide_legend(title = "Genre", title.position = "top", label.position = "right"))
   })
   
   output$top20byrevenue <- renderPlot({
@@ -231,6 +239,81 @@ function(input, output, session) {
         legend.position = "right"
       ) +
       guides(fill = guide_legend(title = "Genre", title.position = "top", label.position = "right"))
+  })
+  
+  #Create scatter plot (y = average_rating)
+  output$scatterplot <- renderPlot({
+    req(input$x_variable)
+    
+    movies_shiny %>%
+      ggplot(aes_string(x = input$x_variable, y = vote_average)) +  # Use aes_string for dynamic variable
+      geom_point(alpha = 0.7, color = "blue") +
+      labs(
+        title = paste("Average Rating vs.", input$x_variable),
+        x = input$x_variable,
+        y = "Average Rating"
+      ) +
+      theme_minimal() + 
+      scale_x_continuous(labels = scales::comma) +  # Format x-axis
+      theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(color = 'black'),
+        axis.ticks = element_line(color = "black"),
+        legend.position = "none"
+      )
+  })
+  
+  #Violin plot of ratings distribution for each genre
+  output$ratings_dist <- renderPlot({
+      movies_shiny %>%
+      filter(vote_count > 0) %>%
+      ggplot(aes(x = main_genre, y = vote_average, fill = main_genre)) +
+      geom_violin(trim = FALSE) + 
+      labs(title = "Distribution of Average Rating by Genre", 
+           x = "Genre", 
+           y = "Average Rating") +
+      theme_minimal() +
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(color = 'black'),
+        axis.ticks = element_line(color = "black"),
+        legend.position = "none"
+      )
+  })
+  
+  #Summary table of ratings by genre
+  output$summary_table <- DT::renderDataTable({
+    summary_table
+  }, options = list(
+    pageLength = 10,
+    scrollX = TRUE
+  ),
+  rownames = FALSE)
+  
+  #Heatmap of average ratings by genre and year
+  output$ratings_heatmap <- renderPlot({
+    movies_shiny %>%
+      filter(vote_count > 0) %>%
+      group_by(main_genre, Year) %>%
+      summarise(Average_Rating = mean(vote_average, na.rm = TRUE)) %>%
+      ungroup() %>%
+      ggplot(aes(x = Year, y = main_genre, fill = Average_Rating)) +
+      geom_tile() +
+      scale_fill_viridis(option = "plasma") +
+      labs(title = "Heatmap of Average Rating by Genre and Year", 
+           x = "Year", 
+           y = "Genre") +
+      theme_minimal()
+  })
+  
+  #Correlation matrix
+  output$corr_matrix <- renderDT({
+    cor_matrix %>%
+      round(2) %>%
+      datatable(options = list(pageLength = 5))
   })
   
 }
